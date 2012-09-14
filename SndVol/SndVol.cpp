@@ -3,6 +3,8 @@
 
 #include <iostream>
 #include <windows.h>
+#include <tchar.h>
+#include "resource.h"
 #include "../../Common/Common.h"
 using namespace std;
 
@@ -39,10 +41,13 @@ BOOL AttachDLL(DWORD ProcessID, wstring dllName)
 	return true;
 }
 
-int main() {
+int _tmain(int argc, _TCHAR* argv[]) {
+	wstring appId = L"{1AC14E77-02E7-4E5D-B744-2EB1AE5198B7}\\SndVol.exe";
 	wstring Process = L"C:/Windows/System32/SndVol.exe";
 	wstring DLL = L"SndVolEx.dll";
 	if (!GetFileExists(DLL)) wprintf(L"Could not find '%s'\n", DLL.c_str());
+
+	SetAppID(GetConsoleWindow(), appId.c_str());	
 
 	STARTUPINFO si;
 	PROCESS_INFORMATION pi;
@@ -52,9 +57,14 @@ int main() {
 	if (!CreateProcess(NULL, LPWSTR(Process.c_str()), NULL, NULL, FALSE, 0, NULL, NULL, &si, &pi))
 		wprintf(L"CreateProcess: %s\n", GetLastErrorEx().c_str());
 	AttachDLL(pi.dwProcessId, DLL);
-	//cin.get();
-	//TerminateProcess(pi.hProcess, 0);
-	//CloseHandle(pi.hProcess);
-	//CloseHandle(pi.hThread);
+
+	// to pin to taskbar: "%BIN%\sndvol -"
+	if (argc > 1) {
+		cin.get();
+		TerminateProcess(pi.hProcess, 0);
+		CloseHandle(pi.hProcess);
+		CloseHandle(pi.hThread);
+	}
+
     return 0;
 }
