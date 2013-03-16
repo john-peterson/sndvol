@@ -18,19 +18,21 @@ bool GetFileExists(wstring filename)
 WNDPROC pOldWndProc = 0;
 HWND hWnd = 0;
 
-BOOL AttachDLL(DWORD ProcessID, wstring dllName) 
-{
-	HANDLE hProc; 
-	LPVOID lpFileName, lpLoadLibrary; 
+BOOL AttachDLL(DWORD ProcessID, wstring dllName) {
+	HANDLE hProc;
+	LPVOID lpFileName, lpLoadLibrary;
 
-	if (!ProcessID) { wprintf(L"No process ID specified\n"); return false; }
+	if (!ProcessID) {
+		wprintf(L"No process ID specified\n");
+		return false;
+	}
 	
 	if (!(hProc = OpenProcess(PROCESS_ALL_ACCESS, FALSE, ProcessID)))
 		wprintf(L"OpenProcess: %s\n", GetLastErrorEx().c_str());
 
 	lpLoadLibrary = (LPVOID)GetProcAddress(GetModuleHandle(L"kernel32.dll"), "LoadLibraryW");
 
-	lpFileName = (LPVOID)VirtualAllocEx(hProc, NULL, dllName.length()*2, MEM_RESERVE | MEM_COMMIT, PAGE_READWRITE);
+	lpFileName = (LPVOID)VirtualAllocEx(hProc, NULL, dllName.length()*2, MEM_RESERVE|MEM_COMMIT, PAGE_READWRITE);
 	if (!WriteProcessMemory(hProc, (LPVOID)lpFileName, dllName.c_str(), dllName.length()*2, NULL))
 		wprintf(L"WriteProcessMemory: %s\n", GetLastErrorEx().c_str());
 
@@ -45,7 +47,8 @@ int _tmain(int argc, _TCHAR* argv[]) {
 	wstring appId = L"{1AC14E77-02E7-4E5D-B744-2EB1AE5198B7}\\SndVol.exe";
 	wstring Process = L"C:/Windows/System32/SndVol.exe";
 	wstring DLL = L"SndVolEx.dll";
-	if (!GetFileExists(DLL)) wprintf(L"Could not find '%s'\n", DLL.c_str());
+	if (!GetFileExists(DLL))
+		wprintf(L"Could not find '%s'\n", DLL.c_str());
 
 	SetAppID(GetConsoleWindow(), appId.c_str());	
 

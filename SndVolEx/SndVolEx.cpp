@@ -4,12 +4,87 @@
 #include <iostream>
 #include <windows.h>
 #include "../../Common/Common.h"
+
 using namespace std;
 
 WNDPROC pWndProc = 0;
+
 struct EnumStruct {
 	HWND hBox;
 };
+
+enum names {
+	ID_WINDOW
+	, ID_APPLICATIONS
+	, ID_DEVICE
+	, ID_MUTE_PROGRAM
+	, ID_MUTE_ALL
+};
+
+// compare string
+
+bool CompareString_(wstring s, wstring t, int start = -1, int end = -1) {
+	if (start > -1)
+		return !s.compare(start, end, t);
+	else
+		return !s.compare(t);
+}
+
+bool CompareStringEn(int id, wstring s) {
+	switch (id) {
+	case ID_APPLICATIONS: return CompareString_(s, L"Applications");
+	case ID_DEVICE: return CompareString_(s, L"Device");
+	case ID_MUTE_PROGRAM: return CompareString_(s, L"Mute", 0, 4);
+	case ID_MUTE_ALL: return CompareString_(s, L"Mute Speakers", 0, 13);
+	}
+}
+
+bool CompareStringSv(int id, wstring s) {
+	switch (id) {
+	case ID_APPLICATIONS: return CompareString_(s, L"Program");
+	case ID_DEVICE: return CompareString_(s, L"Enhet");
+	case ID_MUTE_PROGRAM: return CompareString_(s, L"Ljud av för", 0, 11);
+	case ID_MUTE_ALL: return CompareString_(s, L"Stäng av ljudet för speakers");
+	}
+}
+
+bool CompareString_(int id, wstring s) {
+	LANGID langid = GetUserDefaultUILanguage();
+
+	switch (langid) {
+	case 1053:
+		return CompareStringSv(id, s);
+	default:
+		return CompareStringEn(id, s);
+	}
+}
+
+// return string
+
+wstring GetStringEn(int id) {
+	switch (id) {
+	case ID_WINDOW: return L"Volume Mixer";
+	}
+}
+
+wstring GetStringSv(int id) {
+	switch (id) {
+	case ID_WINDOW: return L"Volymkontrollen";
+	}
+}
+
+wstring GetString(int id) {
+	LANGID langid = GetUserDefaultUILanguage();
+
+	OutputDebugStringEx(L"Language: %d", langid);
+
+	switch (langid) {
+	case 1053:
+		return GetStringSv(id);
+	default:
+		return GetStringEn(id);
+	}
+}
 
 void ShowStyle(HWND hWnd) {
 	OutputDebugStringEx(L"GWL_STYLE: %s", WSTranslate(GetWindowLong(hWnd, GWL_STYLE)).c_str());
@@ -19,9 +94,13 @@ void ShowStyle(HWND hWnd) {
 BOOL CALLBACK EnumChildProc(HWND hWnd, LPARAM lParam) {
 	EnumStruct* s = (EnumStruct*)lParam;
 	wstring title = GetWindowTextEx(hWnd);
-	if (!title.compare(L"Applications")) s->hBox = hWnd;
+
+	if (CompareString_(ID_APPLICATIONS, title))
+		s->hBox = hWnd;
+
 	return true;
 }
+
 BOOL CALLBACK EnumChildProc2(HWND hWnd, LPARAM lParam) {
 	EnumStruct* s = (EnumStruct*)lParam;
 	wstring clsName = GetClassNameEx(hWnd);
@@ -29,28 +108,34 @@ BOOL CALLBACK EnumChildProc2(HWND hWnd, LPARAM lParam) {
 	RECT rcBox, rc;
 	GetClientRect(s->hBox, &rcBox);
 	GetClientRect(hWnd, &rc);
+
 	if (!clsName.compare(L"TileSled Window")
 		|| !clsName.compare(L"#32770")) {
 		//OutputDebugStringEx(L"§0x%08x: %s | %d %d %d %d\n", hWnd, GetClassNameEx(hWnd).c_str(), rc.left, rc.top, rc.right, rc.bottom);
-		SetWindowPos(hWnd, 0, 0, 0, rc.right, rcBox.bottom-10, SWP_NOMOVE|SWP_NOZORDER);
+		SetWindowPos(hWnd, 0, 0, 0, rc.right, rcBox.bottom - 10, SWP_NOMOVE|SWP_NOZORDER);
 	}
-	if (!wndName.compare(L"Device")) {
+
+	if (CompareString_(ID_DEVICE, wndName)) {
 		//OutputDebugStringEx(L"§0x%08x: %s | %d %d %d %d\n", hWnd, GetClassNameEx(hWnd).c_str(), rc.left, rc.top, rc.right, rc.bottom);
 		BOOL b = SetWindowPos(hWnd, 0, 0, 0, rc.right, rcBox.bottom, SWP_NOMOVE|SWP_NOZORDER);
 		//RedrawWindow(hWnd, 0, 0, RDW_UPDATENOW);
 	}
+
 	if (!clsName.compare(L"msctls_trackbar32")) {
 		//OutputDebugStringEx(L"§0x%08x: %s | %d %d %d %d\n", hWnd, GetClassNameEx(hWnd).c_str(), rc.left, rc.top, rc.right, rc.bottom);
-		SetWindowPos(hWnd, 0, 0, 0, rc.right, rcBox.bottom-140, SWP_NOMOVE|SWP_NOZORDER);
+		SetWindowPos(hWnd, 0, 0, 0, rc.right, rcBox.bottom - 140, SWP_NOMOVE|SWP_NOZORDER);
 	}
-	if (!wndName.compare(0, 4, L"Mute")) {
+
+	if (CompareString_(ID_MUTE_PROGRAM, wndName)) {
 		//OutputDebugStringEx(L"§0x%08x: %s | %d %d %d %d\n", hWnd, GetClassNameEx(hWnd).c_str(), rc.left, rc.top, rc.right, rc.bottom);
-		SetWindowPos(hWnd, 0, 30, rcBox.bottom-70, 0, 0, SWP_NOSIZE|SWP_NOZORDER);
+		SetWindowPos(hWnd, 0, 30, rcBox.bottom - 70, 0, 0, SWP_NOSIZE|SWP_NOZORDER);
 	}
-	if (!wndName.compare(0, 13, L"Mute Speakers")) {
+
+	if (CompareString_(ID_MUTE_ALL, wndName)) {
 		//OutputDebugStringEx(L"§0x%08x: %s | %d %d %d %d\n", hWnd, GetClassNameEx(hWnd).c_str(), rc.left, rc.top, rc.right, rc.bottom);
-		SetWindowPos(hWnd, 0, 42, rcBox.bottom-36, 0, 0, SWP_NOSIZE|SWP_NOZORDER);
+		SetWindowPos(hWnd, 0, 42, rcBox.bottom - 36, 0, 0, SWP_NOSIZE|SWP_NOZORDER);
 	}
+
 	return true;
 }
 
@@ -76,21 +161,27 @@ def:
 
 // override wndproc
 void OverrideWndProc(HWND hWnd) {
-	if (!IsWindow(hWnd)) return;
+	if (!IsWindow(hWnd))
+		return;
+
 	if (!(pWndProc = (WNDPROC)GetWindowLongPtr(hWnd, GWLP_WNDPROC)))
 		OutputDebugStringEx(L"pOldWndProc: %s", GetLastErrorEx().c_str());
+
 	if (!SetWindowLongPtr(hWnd, GWLP_WNDPROC, LONG_PTR(WindowProc)))
 		OutputDebugStringEx(L"SetWindowLongPtr: %s", GetLastErrorEx().c_str());
 }
 
 DWORD WINAPI ThreadFunction(LPVOID lpParam) {
 	HWND hWnd = 0;
+
 	while (!hWnd) {
-		hWnd = FindWindowByTitle(L"Volume Mixer");
+		hWnd = FindWindowByTitle(GetString(ID_WINDOW));
 		Sleep(1000/25);
 	}
+
 	ChangeStyle(hWnd, WS_OVERLAPPEDWINDOW);
 	OverrideWndProc(hWnd);
+
 	return 0;
 }
 
