@@ -5,7 +5,7 @@
 #include <windows.h>
 #include <tchar.h>
 #include "resource.h"
-#include "../../Common/Common.h"
+#include "../Common/Common.h"
 using namespace std;
 
 bool GetFileExists(wstring filename)
@@ -69,5 +69,5 @@ int _tmain(int argc, _TCHAR* argv[]) {
 		CloseHandle(pi.hThread);
 	}
 
-    return 0;
+	return 0;
 }

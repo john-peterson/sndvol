@@ -8,7 +8,7 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "SndVol", "SndVol\SndVol.vcx
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "SndVolEx", "SndVolEx\SndVolEx.vcxproj", "{9B44B29A-B5BE-EA85-4EA5-266346B57691}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Common", "..\common\Common.vcxproj", "{E6ACE6B7-E8BF-4979-B32F-9CA56C7BD8A8}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Common", "common\Common.vcxproj", "{E6ACE6B7-E8BF-4979-B32F-9CA56C7BD8A8}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

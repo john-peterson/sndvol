@@ -3,7 +3,7 @@
 
 #include <iostream>
 #include <windows.h>
-#include "../../Common/Common.h"
+#include "../Common/Common.h"
 
 using namespace std;
 

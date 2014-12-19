@@ -46,7 +46,7 @@
     <ClCompile Include="SndVolEx.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\Common\Common.vcxproj">
+    <ProjectReference Include="..\Common\Common.vcxproj">
       <Project>{e6ace6b7-e8bf-4979-b32f-9ca56c7bd8a8}</Project>
     </ProjectReference>
   </ItemGroup>
